@@ -1,0 +1,91 @@
+name: aos-cx-demo
+topology:
+  kinds:
+    aruba_aoscx:
+      type: aruba_aoscx
+      image: ghcr.io/$GITHUB_USER/arubaos-cx:latest
+    linux:
+      image: ghcr.io/hellt/network-multitool
+  nodes:
+    ### Hosts ###
+    host1:
+      kind: linux
+      binds:
+        - configs/host1.sh:/host1.sh
+      exec:
+        - bash /host1.sh
+      labels:
+        graph-icon: client
+        graph-posX: "535"
+        graph-posY: "365"
+        graph-groupLabelPos: bottom-center
+    host2:
+      kind: linux
+      binds:
+        - configs/host2.sh:/host2.sh
+      exec:
+        - bash /host2.sh
+      labels:
+        graph-icon: client
+        graph-posX: "675"
+        graph-posY: "365"
+        graph-groupLabelPos: bottom-center
+    ### Aggregation Switches ###    
+    agg1:
+      kind: aruba_aoscx
+      startup-config: configs/agg1-config.txt
+      labels:
+        graph-icon: switch
+        graph-posX: "535"
+        graph-posY: "215"
+        graph-groupLabelPos: bottom-center
+    agg2:
+      kind: aruba_aoscx
+      startup-config: configs/agg2-config.txt
+      stages:
+        create:
+          wait-for:
+            - node: agg1
+              stage: healthy
+      labels:
+        graph-icon: switch
+        graph-posX: "675"
+        graph-posY: "215"
+        graph-groupLabelPos: bottom-center
+    ### Access Switches ###  
+    access1:
+      kind: aruba_aoscx
+      startup-config: configs/access1-config.txt
+      stages:
+        create:
+          wait-for:
+            - node: agg2
+              stage: healthy
+      labels:
+        graph-icon: switch
+        graph-posX: "535"
+        graph-posY: "295"
+        graph-groupLabelPos: bottom-center
+    access2:
+      kind: aruba_aoscx
+      startup-config: configs/access2-config.txt
+      stages:
+        create:
+          wait-for:
+            - node: access1
+              stage: healthy
+      labels:
+        graph-icon: switch
+        graph-posX: "675"
+        graph-posY: "295"
+        graph-groupLabelPos: bottom-center
+  links:
+    - endpoints: [ "agg1:1/1/9", "agg2:1/1/9" ]
+    - endpoints: [ "agg1:1/1/8", "agg2:1/1/8" ]
+    - endpoints: [ "agg1:1/1/7", "agg2:1/1/7" ]
+    - endpoints: [ "agg1:1/1/1", "access1:1/1/8" ]
+    - endpoints: [ "agg1:1/1/2", "access2:1/1/8" ]
+    - endpoints: [ "agg2:1/1/1", "access1:1/1/9" ]
+    - endpoints: [ "agg2:1/1/2", "access2:1/1/9" ]
+    - endpoints: [ "access1:1/1/1", "host1:eth1" ]
+    - endpoints: [ "access2:1/1/2", "host2:eth1" ]

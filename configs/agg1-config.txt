@@ -1,0 +1,71 @@
+hostname agg-1
+vrf KEEPALIVE
+ntp server pool.ntp.org minpoll 4 maxpoll 4 iburst
+ntp enable
+ntp vrf mgmt
+!
+!
+!
+!
+!
+ssh server vrf mgmt
+vlan 1,11,12
+interface mgmt
+    no shutdown
+    ip static 10.0.0.15/24
+    default-gateway 10.0.0.2
+interface lag 1 multi-chassis
+    no shutdown
+    no routing
+    vlan access 11
+    lacp mode active         
+interface lag 2 multi-chassis
+    no shutdown
+    no routing
+    vlan access 12
+    lacp mode active                                    
+interface lag 256
+    description ISL
+    no shutdown
+    no routing
+    vlan trunk native 1 tag
+    vlan trunk allowed all
+    lacp mode active
+interface 1/1/1
+    no shutdown
+    lag 1
+interface 1/1/2
+    no shutdown
+    lag 2
+interface 1/1/7
+    description VSX Keepalive
+    no shutdown
+    vrf attach KEEPALIVE
+    ip address 10.0.1.1/24
+interface 1/1/8
+    no shutdown
+    mtu 9198
+    lag 256
+interface 1/1/9
+    no shutdown
+    mtu 9198
+    lag 256
+interface vlan 11
+    ip address 10.0.11.251/24
+    active-gateway ip mac 12:01:00:00:00:00
+    active-gateway ip 10.0.11.1
+interface vlan 12
+    ip address 10.0.12.251/24
+    active-gateway ip mac 12:01:00:00:00:00
+    active-gateway ip 10.0.12.1
+vsx
+    system-mac 02:00:00:00:01:00
+    inter-switch-link lag 256
+    role primary
+    keepalive peer 10.0.1.2 source 10.0.1.1 vrf KEEPALIVE
+!
+!
+!
+!
+!
+https-server vrf mgmt
