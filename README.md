@@ -292,7 +292,7 @@ This is also where to specify the icon shown for each node.
 
 ### AOS-CX Switch Simulator - Feature Caveats
 
-For quick reference, I've listed the features that may be configuration but will be _non-functional_ in the AOS-CX Switch Simulator.
+For quick reference, I've listed the features that may be configurable but will be _non-functional_ in the AOS-CX Switch Simulator.
 As always, check the release notes for the version you are using for more specific details.
 
 - CoPP
