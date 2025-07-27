@@ -3,7 +3,7 @@ name: Build & Push ArubaOS-CX Docker Image
 on:
   workflow_dispatch:
     inputs:
-      ova_zip_url: https://networkingsupport.hpe.com/downloads/software/RmlsZTowMmY5MjEzYy00YzYzLTExZjAtYjIxYy0xN2VhMjU0ZDEwOTc%3D
+      ova_zip_url: 
         description: "Download URL for OVA.zip"
         required: true
 
