@@ -1,1 +1,73 @@
-
+name: aos-cx-vxlan
+topology:
+  kinds:
+    aruba_aoscx:
+      type: aruba_aoscx
+      image: ghcr.io/$GITHUB_USER/arubaos-cx:latest
+    linux:
+      image: ghcr.io/hellt/network-multitool
+  nodes:
+    ### Hosts ###
+    host1:
+      kind: linux
+      binds:
+        - configs/host1.sh:/host1.sh
+      exec:
+        - bash /host1.sh
+      labels:
+        graph-icon: client
+        graph-posX: "535"
+        graph-posY: "365"
+        graph-groupLabelPos: bottom-center
+    host2:
+      kind: linux
+      binds:
+        - configs/host2.sh:/host2.sh
+      exec:
+        - bash /host2.sh
+      labels:
+        graph-icon: client
+        graph-posX: "675"
+        graph-posY: "365"
+        graph-groupLabelPos: bottom-center
+    ### Aggregation Switches ###    
+    core:
+      kind: aruba_aoscx
+      startup-config: configs/core-config.txt
+      labels:
+        graph-icon: switch
+        graph-posX: "535"
+        graph-posY: "215"
+        graph-groupLabelPos: bottom-center
+    bo-edge:
+      kind: aruba_aoscx
+      startup-config: configs/boedge-config.txt
+      stages:
+        create:
+          wait-for:
+            - node: core
+              stage: healthy
+      labels:
+        graph-icon: switch
+        graph-posX: "675"
+        graph-posY: "215"
+        graph-groupLabelPos: bottom-center
+    ### Access Switches ###  
+    hq-edge:
+      kind: aruba_aoscx
+      startup-config: configs/hqedge-config.txt
+      stages:
+        create:
+          wait-for:
+            - node: bo-edge
+              stage: healthy
+      labels:
+        graph-icon: switch
+        graph-posX: "535"
+        graph-posY: "295"
+        graph-groupLabelPos: bottom-center
+  links:
+    - endpoints: [ "hq-edge:1/1/9", "core:1/1/9" ]
+    - endpoints: [ "bo-edge:1/1/8", "core:1/1/8" ]
+    - endpoints: [ "hq-edge:1/1/1", "host1:eth1" ]
+    - endpoints: [ "bo-edge:1/1/2", "host2:eth1" ]
