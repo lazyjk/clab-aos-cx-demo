@@ -1,0 +1,21 @@
+hostname hqedge
+ntp server pool.ntp.org minpoll 4 maxpoll 4 iburst
+ntp enable
+ntp vrf mgmt
+!
+!
+!
+!
+!
+ssh server vrf mgmt
+vlan 1,11,12
+interface mgmt
+    no shutdown
+    ip static 10.0.0.16/24
+    default-gateway 10.0.0.2
+!
+!
+!
+!
+!
+https-server vrf mgmt
